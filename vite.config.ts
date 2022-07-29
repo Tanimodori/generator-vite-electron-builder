@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import glob from 'glob';
 
 export default defineConfig({
   build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    cssCodeSplit: true,
     minify: false,
     lib: {
       entry: path.resolve(__dirname, 'src/generator/app/index.ts'),
@@ -11,7 +13,6 @@ export default defineConfig({
     },
     rollupOptions: {
       external: ['yeoman-generator'],
-      input: glob.sync(path.resolve(__dirname, 'src/**/*.{js,css}')),
       output: {
         preserveModules: true,
         preserveModulesRoot: 'src',
@@ -29,6 +30,5 @@ export default defineConfig({
         },
       },
     },
-    outDir: 'dist',
   },
 });
