@@ -29,6 +29,7 @@ export default class extends Generator {
         type: 'list',
         name: 'prettierStyle',
         message: 'Preferred prettier style?',
+        when: (currentAnswers: { prettier: boolean }) => currentAnswers.prettier,
         default: 'original',
         choices: [
           {
@@ -37,7 +38,7 @@ export default class extends Generator {
             value: 'original',
           },
           {
-            name: 'The Popular style used in Vue community',
+            name: 'The popular style used in Vue community',
             short: 'Community',
             value: 'community',
           },
@@ -49,19 +50,25 @@ export default class extends Generator {
         ],
       },
       {
-        type: 'confirm',
+        type: 'checkbox',
         name: 'test',
-        message: 'Use vitest for testing?',
-      },
-      {
-        type: 'confirm',
-        name: 'e2e',
-        message: 'Use Playwright for e2e testing?',
+        message: 'Test features?',
+        default: ['unit', 'e2e'],
+        choices: [
+          {
+            name: 'Unit tests',
+            value: 'unit',
+          },
+          {
+            name: 'e2e tests',
+            value: 'e2e',
+          },
+        ],
       },
       {
         type: 'checkbox',
         name: 'css',
-        message: 'Extra CSS features?',
+        message: 'CSS features?',
         choices: [
           {
             name: 'TailwindCSS',
