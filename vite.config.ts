@@ -10,6 +10,9 @@ export default defineConfig({
       formats: ['cjs'],
       fileName: 'generator/app/index',
     },
+    rollupOptions: {
+      external: ['yeoman-generator'],
+    },
     outDir: 'dist',
   },
 });
