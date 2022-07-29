@@ -1,4 +1,5 @@
 import Generator from 'yeoman-generator';
+import foo from './foo';
 
 export default class extends Generator {
   public constructor(args: string | string[], opts: Generator.GeneratorOptions) {
@@ -8,6 +9,6 @@ export default class extends Generator {
   }
 
   greet() {
-    console.log('hello world');
+    foo();
   }
 }
