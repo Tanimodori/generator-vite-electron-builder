@@ -1,0 +1,14 @@
+{
+  "name": "create-vite-electron-builder",
+  "version": "0.0.1",
+  "description": "A scaffolding tool to create project from vite-electron-builder template",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "scaffold"
+  ],
+  "author": "Tanimodori",
+  "license": "MIT"
+}
