@@ -4,7 +4,7 @@
   "description": "A scaffolding tool to create project from vite-electron-builder template",
   "scripts": {
     "build": "vite build",
-    "test": "node dist/index.mjs"
+    "test": "node dist/generator/app/index.js"
   },
   "devDependencies": {
     "@types/node": "^18.6.2",
@@ -18,14 +18,8 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/index.umd.cjs",
-  "module": "./dist/index.js",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.umd.cjs"
-    }
-  },
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
   "author": "Tanimodori",
   "license": "MIT",
   "keywords": [
