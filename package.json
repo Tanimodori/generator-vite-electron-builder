@@ -1,5 +1,5 @@
 {
-  "name": "create-vite-electron-builder",
+  "name": "generator-vite-electron-builder",
   "version": "0.0.1",
   "description": "A scaffolding tool to create project from vite-electron-builder template",
   "scripts": {
@@ -29,6 +29,10 @@
   "author": "Tanimodori",
   "license": "MIT",
   "keywords": [
+    "yeoman-generator",
     "scaffold"
-  ]
+  ],
+  "dependencies": {
+    "yeoman-generator": "^5.6.1"
+  }
 }
