@@ -8,8 +8,8 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'GeneratorViteElectronBuilder',
       formats: ['cjs'],
-      fileName: 'index',
+      fileName: 'generator/app/index',
     },
-    outDir: 'dist/generator/app',
+    outDir: 'dist',
   },
 });
