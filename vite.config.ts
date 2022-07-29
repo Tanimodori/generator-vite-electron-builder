@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
+import glob from 'glob';
 
 export default defineConfig({
   build: {
@@ -13,9 +14,9 @@ export default defineConfig({
     },
     rollupOptions: {
       external: ['yeoman-generator'],
+      input: glob.sync(path.resolve(__dirname, 'src/**/*.ts')),
       output: {
         preserveModules: true,
-        preserveModulesRoot: 'src',
         entryFileNames: (entry) => {
           const { name, facadeModuleId } = entry;
           const fileName = `${name}.js`;
