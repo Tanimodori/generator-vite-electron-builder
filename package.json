@@ -10,5 +10,9 @@
     "scaffold"
   ],
   "author": "Tanimodori",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.7.4",
+    "vite": "^3.0.3"
+  }
 }
