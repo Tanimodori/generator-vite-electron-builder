@@ -84,6 +84,29 @@ export default class extends Generator {
           },
         ],
       },
+      {
+        type: 'list',
+        name: 'devtools',
+        message: 'Install Vue Devtools via?',
+        default: 'online',
+        choices: [
+          {
+            name: 'electron-devtools-installer, a online installer',
+            short: 'electron-devtools-installer',
+            value: 'online',
+          },
+          {
+            name: "The local installed devtools in Chrome's Appdata",
+            short: 'Local',
+            value: 'local',
+          },
+          {
+            name: 'Do not install',
+            short: 'Empty',
+            value: 'noop',
+          },
+        ],
+      },
     ]);
 
     this.log(answers);
