@@ -2,18 +2,29 @@
   "name": "create-vite-electron-builder",
   "version": "0.0.1",
   "description": "A scaffolding tool to create project from vite-electron-builder template",
-  "main": "index.js",
   "scripts": {
+    "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "scaffold"
-  ],
-  "author": "Tanimodori",
-  "license": "MIT",
   "devDependencies": {
     "@types/node": "^18.6.2",
     "typescript": "^4.7.4",
     "vite": "^3.0.3"
-  }
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
+    }
+  },
+  "author": "Tanimodori",
+  "license": "MIT",
+  "keywords": [
+    "scaffold"
+  ]
 }
