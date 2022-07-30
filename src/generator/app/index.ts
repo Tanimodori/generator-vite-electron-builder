@@ -1,5 +1,5 @@
 import Generator from 'yeoman-generator';
-import { prompts } from './prompts';
+import { getPrompts } from './prompts';
 
 export default class extends Generator {
   public constructor(args: string | string[], opts: Generator.GeneratorOptions) {
@@ -11,7 +11,7 @@ export default class extends Generator {
   }
 
   async prompting() {
-    const answers = await this.prompt(prompts);
+    const answers = await this.prompt(getPrompts(this));
 
     this.log(answers);
   }
