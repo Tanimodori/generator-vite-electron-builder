@@ -9,26 +9,16 @@ export default defineConfig({
     cssCodeSplit: true,
     minify: false,
     lib: {
-      entry: path.resolve(__dirname, 'src/generator/app/index.ts'),
+      entry: path.resolve(__dirname, 'generator/app/index.ts'),
       formats: ['cjs'],
     },
     rollupOptions: {
-      external: ['yeoman-generator'],
-      input: glob.sync(path.resolve(__dirname, 'src/**/*.ts')),
+      external: ['yeoman-generator', 'fs'],
+      input: glob.sync(path.resolve(__dirname, 'generator/**/*.ts')),
       output: {
         preserveModules: true,
-        entryFileNames: (entry) => {
-          const { name, facadeModuleId } = entry;
-          const fileName = `${name}.js`;
-          if (!facadeModuleId) {
-            return fileName;
-          }
-          const relativeDir = path.relative(
-            path.resolve(__dirname, 'src'),
-            path.dirname(facadeModuleId),
-          );
-          return path.join(relativeDir, fileName);
-        },
+        preserveModulesRoot: path.resolve(__dirname),
+        entryFileNames: ({ name }) => `${name}.js`,
       },
     },
   },
