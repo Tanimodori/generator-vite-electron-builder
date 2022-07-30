@@ -27,6 +27,7 @@ export const getPrompts = (generator: Generator): Generator.Questions<PromptAnsw
         if (await pathExist(joinedPath)) {
           return `Path ${joinedPath} is not empty, please try another name`;
         }
+        return true;
       },
       default: 'vite-electron-builder',
     },
