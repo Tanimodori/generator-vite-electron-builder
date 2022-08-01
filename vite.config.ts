@@ -5,7 +5,7 @@ import glob from 'glob';
 export default defineConfig({
   resolve: {
     alias: {
-      builtins: path.resolve(__dirname, 'generator/app/builtins'),
+      builtins: path.resolve(__dirname, 'generator/app/validate/builtins'),
     },
   },
   build: {
