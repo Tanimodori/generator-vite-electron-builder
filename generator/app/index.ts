@@ -1,7 +1,9 @@
 import Generator from 'yeoman-generator';
 import { gitCloneTo } from './execuator/git';
-import { getPrompts, PromptAnswers } from './prompts';
+import { prompt, PromptAnswers } from './prompts';
 import { hasGit } from './validate/toolchain';
+
+const REPO_URL = 'https://github.com/cawa-93/vite-electron-builder.git';
 
 export default class extends Generator {
   answers?: PromptAnswers;
@@ -21,8 +23,7 @@ export default class extends Generator {
   }
 
   async prompting() {
-    const answers = await this.prompt(getPrompts(this));
-    this.answers = answers;
+    this.answers = await prompt(this);
 
     this.log(this.answers);
   }
@@ -33,6 +34,6 @@ export default class extends Generator {
       return;
     }
     // Clone git repository
-    await gitCloneTo(this, 'https://github.com/cawa-93/vite-electron-builder.git', this.answers.id);
+    await gitCloneTo(this, REPO_URL, this.answers.id);
   }
 }

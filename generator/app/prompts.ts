@@ -11,16 +11,15 @@ export interface PromptAnswers {
   devtools: 'online' | 'local' | 'noop';
 }
 
-export const getPrompts = (generator: Generator): Generator.Questions<PromptAnswers> => {
-  return [
+export const prompt = async (generator: Generator) => {
+  const prompts = [
     {
       type: 'input',
       name: 'id',
       message: 'Project Name?',
       transformer: (id: string) => id.trim(),
       validate: async (input: string) => {
-        const joinedPath = generator.destinationPath(input);
-        return validateProjectName(input, joinedPath);
+        return validateProjectName(generator, input);
       },
       default: 'vite-electron-builder',
     },
@@ -117,4 +116,5 @@ export const getPrompts = (generator: Generator): Generator.Questions<PromptAnsw
       ],
     },
   ];
+  return generator.prompt<PromptAnswers>(prompts);
 };
