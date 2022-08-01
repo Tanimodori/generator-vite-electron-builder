@@ -33,6 +33,8 @@ export default class extends Generator {
       this.env.error(new Error('ILLEGAL_ARG'));
       return;
     }
+    // Set destination path to sub directory
+    this.destinationRoot(this.destinationPath(this.answers.id));
     // Clone git repository
     await gitCloneTo(this, REPO_URL, this.answers.id);
   }
