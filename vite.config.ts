@@ -3,12 +3,6 @@ import path from 'path';
 import glob from 'glob';
 import builtins from './src/app/validate/builtins';
 
-/**
- * replace '\\' to '/'
- */
-const fixPathSep = (filepath?: string) => filepath?.replace(new RegExp('\\' + path.sep, 'g'), '/');
-const srcPath = fixPathSep(path.resolve(__dirname, 'src'));
-
 export default defineConfig({
   resolve: {
     alias: {
@@ -29,19 +23,20 @@ export default defineConfig({
       input: glob.sync(path.resolve(__dirname, 'src/**/*.ts')),
       output: {
         preserveModules: true,
-        preserveModulesRoot: srcPath,
+        preserveModulesRoot: path.resolve(__dirname, 'src'),
         entryFileNames: () => `[name].js`,
       },
       plugins: [
+        /**
+         * See https://github.com/rollup/rollup/issues/4496
+         */
         {
           name: 'fixPreserveModulesRoot',
-          outputOptions(this, options) {
-            console.log('outputOptions', options.preserveModulesRoot);
-          },
           renderStart(options) {
-            console.log('renderStart', options.preserveModulesRoot);
-            options.preserveModulesRoot = fixPathSep(options.preserveModulesRoot);
-            console.log('renderStartFixed', options.preserveModulesRoot);
+            options.preserveModulesRoot = options.preserveModulesRoot?.replace(
+              new RegExp(/\\/, 'g'),
+              '/',
+            );
           },
         },
       ],
