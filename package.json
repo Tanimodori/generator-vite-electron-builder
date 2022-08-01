@@ -23,8 +23,8 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/index.js",
-  "exports": "./dist/index.js",
+  "main": "./dist/generator/app/index.js",
+  "exports": "./dist",
   "author": "Tanimodori",
   "license": "MIT",
   "keywords": [
