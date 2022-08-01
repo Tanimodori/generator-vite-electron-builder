@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import glob from 'glob';
+import builtins from './generator/app/validate/builtins';
 
 export default defineConfig({
   resolve: {
@@ -18,7 +19,7 @@ export default defineConfig({
       formats: ['cjs'],
     },
     rollupOptions: {
-      external: ['yeoman-generator', 'yo', 'fs'],
+      external: ['yeoman-generator', 'yo', ...builtins()],
       input: glob.sync(path.resolve(__dirname, 'generator/**/*.ts')),
       output: {
         preserveModules: true,
