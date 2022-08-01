@@ -1,26 +1,26 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import glob from 'glob';
-import builtins from './generator/app/validate/builtins';
+import builtins from './src/app/validate/builtins';
 
 export default defineConfig({
   resolve: {
     alias: {
-      builtins: path.resolve(__dirname, 'generator/app/validate/builtins'),
+      builtins: path.resolve(__dirname, 'src/app/validate/builtins'),
     },
   },
   build: {
-    outDir: 'dist',
+    outDir: 'generator',
     emptyOutDir: true,
     cssCodeSplit: true,
     minify: false,
     lib: {
-      entry: path.resolve(__dirname, 'generator/app/index.ts'),
+      entry: path.resolve(__dirname, 'src/app/index.ts'),
       formats: ['cjs'],
     },
     rollupOptions: {
       external: ['yeoman-generator', 'yo', ...builtins()],
-      input: glob.sync(path.resolve(__dirname, 'generator/**/*.ts')),
+      input: glob.sync(path.resolve(__dirname, 'src/**/*.ts')),
       output: {
         preserveModules: true,
         preserveModulesRoot: path.resolve(__dirname),

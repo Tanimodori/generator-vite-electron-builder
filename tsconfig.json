@@ -11,5 +11,5 @@
     "baseUrl": ".",
     "esModuleInterop": true
   },
-  "include": ["generator/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }
