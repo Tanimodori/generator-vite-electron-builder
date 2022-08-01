@@ -1,5 +1,5 @@
 import Generator from 'yeoman-generator';
-import { pathExist, validateProjectName } from './validate';
+import { validateProjectName } from './validate/name';
 
 export interface PromptAnswers {
   id: string;
@@ -19,15 +19,8 @@ export const getPrompts = (generator: Generator): Generator.Questions<PromptAnsw
       message: 'Project Name?',
       transformer: (id: string) => id.trim(),
       validate: async (input: string) => {
-        const checkResult = await validateProjectName(input);
-        if (checkResult !== true) {
-          return checkResult;
-        }
         const joinedPath = generator.destinationPath(input);
-        if (await pathExist(joinedPath)) {
-          return `Path ${joinedPath} is not empty, please try another name`;
-        }
-        return true;
+        return validateProjectName(input, joinedPath);
       },
       default: 'vite-electron-builder',
     },
