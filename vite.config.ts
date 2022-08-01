@@ -3,6 +3,12 @@ import path from 'path';
 import glob from 'glob';
 import builtins from './src/app/validate/builtins';
 
+/**
+ * replace '\\' to '/'
+ */
+const fixPathSep = (filepath?: string) => filepath?.replace(new RegExp('\\' + path.sep, 'g'), '/');
+const srcPath = fixPathSep(path.resolve(__dirname, 'src'));
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -23,9 +29,22 @@ export default defineConfig({
       input: glob.sync(path.resolve(__dirname, 'src/**/*.ts')),
       output: {
         preserveModules: true,
-        preserveModulesRoot: path.resolve(__dirname),
-        entryFileNames: ({ name }) => `${name}.js`,
+        preserveModulesRoot: srcPath,
+        entryFileNames: () => `[name].js`,
       },
+      plugins: [
+        {
+          name: 'fixPreserveModulesRoot',
+          outputOptions(this, options) {
+            console.log('outputOptions', options.preserveModulesRoot);
+          },
+          renderStart(options) {
+            console.log('renderStart', options.preserveModulesRoot);
+            options.preserveModulesRoot = fixPathSep(options.preserveModulesRoot);
+            console.log('renderStartFixed', options.preserveModulesRoot);
+          },
+        },
+      ],
     },
   },
 });
