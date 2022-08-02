@@ -1,6 +1,6 @@
 import Generator from 'yeoman-generator';
 import { gitCloneTo } from './execuator/git';
-import { prompt, PromptAnswers } from './prompts';
+import { getPrompts, type PromptAnswers } from './prompts';
 import { Logger } from './types';
 import { hasGit } from './validate/toolchain';
 
@@ -32,7 +32,7 @@ export default class extends Generator {
   }
 
   async prompting() {
-    this.answers = await prompt(this);
+    this.answers = await this.prompt(getPrompts(this.destinationPath()));
 
     this.log(this.answers);
   }

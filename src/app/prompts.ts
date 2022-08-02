@@ -1,4 +1,5 @@
-import Generator from 'yeoman-generator';
+import path from 'path';
+import { Question } from 'yeoman-generator';
 import { validateProjectName } from './validate/name';
 
 export interface PromptAnswers {
@@ -11,15 +12,15 @@ export interface PromptAnswers {
   devtools: 'online' | 'local' | 'noop';
 }
 
-export const prompt = async (generator: Generator) => {
-  const prompts = [
+export const getPrompts = (dest: string): Question<PromptAnswers> => {
+  return [
     {
       type: 'input',
       name: 'id',
       message: 'Project Name?',
       transformer: (id: string) => id.trim(),
       validate: async (input: string) => {
-        return validateProjectName(generator, input);
+        return validateProjectName(input, path.resolve(input, dest));
       },
       default: 'vite-electron-builder',
     },
@@ -116,5 +117,4 @@ export const prompt = async (generator: Generator) => {
       ],
     },
   ];
-  return generator.prompt<PromptAnswers>(prompts);
 };
