@@ -1,14 +1,23 @@
 import Generator from 'yeoman-generator';
 import { gitCloneTo } from './execuator/git';
 import { prompt, PromptAnswers } from './prompts';
+import { Logger } from './types';
 import { hasGit } from './validate/toolchain';
 
-const REPO_URL = 'https://github.com/cawa-93/vite-electron-builder.git';
+export const REPO_URL = 'https://github.com/cawa-93/vite-electron-builder.git';
 
 export default class extends Generator {
   answers?: PromptAnswers;
   public constructor(args: string | string[], opts: Generator.GeneratorOptions) {
     super(args, opts);
+  }
+
+  get logger(): Logger {
+    return {
+      log: (message?: string) => this.log(message),
+      error: (message?: string) => this.log.error(message),
+      abort: (message?: string) => this.env.error(new Error(message)),
+    };
   }
 
   async initializing() {
@@ -36,6 +45,6 @@ export default class extends Generator {
     // Set destination path to sub directory
     this.destinationRoot(this.destinationPath(this.answers.id));
     // Clone git repository
-    await gitCloneTo(this, REPO_URL, this.answers.id);
+    await gitCloneTo(REPO_URL, this.answers.id, this.logger);
   }
 }
