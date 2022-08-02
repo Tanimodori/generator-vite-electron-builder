@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, configDefaults } from 'vitest/config';
 import glob from 'glob';
 import builtins from './src/app/validate/builtins';
 
@@ -40,5 +40,9 @@ export default defineConfig({
         },
       ],
     },
+  },
+  test: {
+    setupFiles: './test/setup.ts',
+    exclude: [...configDefaults.exclude, './test/repo'],
   },
 });
