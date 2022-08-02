@@ -1,12 +1,11 @@
 import { defineConfig } from 'vite';
-import path from 'path';
 import glob from 'glob';
 import builtins from './src/app/validate/builtins';
 
 export default defineConfig({
   resolve: {
     alias: {
-      builtins: path.resolve(__dirname, 'src/app/validate/builtins'),
+      builtins: './src/app/validate/builtins.ts',
     },
   },
   build: {
@@ -15,15 +14,15 @@ export default defineConfig({
     cssCodeSplit: true,
     minify: false,
     lib: {
-      entry: path.resolve(__dirname, 'src/app/index.ts'),
+      entry: './src/app/index.ts',
       formats: ['cjs'],
     },
     rollupOptions: {
       external: ['yeoman-generator', 'yo', ...builtins()],
-      input: glob.sync(path.resolve(__dirname, 'src/**/*.ts')),
+      input: glob.sync('src/**/*.ts'),
       output: {
         preserveModules: true,
-        preserveModulesRoot: path.resolve(__dirname, 'src'),
+        preserveModulesRoot: 'src',
         entryFileNames: () => `[name].js`,
       },
       plugins: [
