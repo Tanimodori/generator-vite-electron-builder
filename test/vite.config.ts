@@ -18,7 +18,7 @@ export default defineConfig({
       formats: ['cjs'],
     },
     rollupOptions: {
-      external: ['yeoman-generator', 'yo', ...builtins()],
+      external: ['yeoman-generator', 'yo', 'mocha', ...builtins()],
       input: glob.sync('test/**/*.ts'),
       output: {
         preserveModules: true,
