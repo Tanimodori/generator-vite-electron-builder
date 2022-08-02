@@ -10,6 +10,7 @@
     "test:e2e": "yo ./generator/app"
   },
   "devDependencies": {
+    "@types/mocha": "^9.1.1",
     "@types/node": "^18.6.2",
     "@types/validate-npm-package-name": "^4.0.0",
     "@types/yeoman-generator": "^5.2.10",
