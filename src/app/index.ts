@@ -1,7 +1,7 @@
 import Generator from 'yeoman-generator';
 import { gitCloneTo } from './execuator/git';
 import { getPrompts, type PromptAnswers } from './prompts';
-import { Logger } from './types';
+import { Logger } from './types/types';
 import { hasGit } from './validate/toolchain';
 
 export const REPO_URL = 'https://github.com/cawa-93/vite-electron-builder.git';

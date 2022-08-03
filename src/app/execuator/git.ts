@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import type { Logger } from '../types';
+import type { Logger } from '../types/types';
 
 export const gitCloneTo = async (repo: string, dest: string, logger?: Logger) => {
   return new Promise<void>((resolve, reject) => {
