@@ -21,6 +21,7 @@ export default defineConfig({
       external: ['yeoman-generator', 'yo', ...builtins()],
       input: glob.sync('src/**/*.ts'),
       output: {
+        exports: 'named',
         preserveModules: true,
         preserveModulesRoot: 'src',
         entryFileNames: () => `[name].js`,
