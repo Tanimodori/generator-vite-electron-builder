@@ -43,6 +43,6 @@ export default defineConfig({
   },
   test: {
     setupFiles: './test/setup.ts',
-    exclude: [...configDefaults.exclude, './test/repo'],
+    exclude: [...configDefaults.exclude, './test/repo/**'],
   },
 });
