@@ -9,13 +9,9 @@ export const parseCode = (code: string) => {
   });
 };
 
-export const patchRendererConfig = (code: string, config: PromptAnswers): string => {
+export const patchRendererConfig = (code: string, config: PromptAnswers) => {
   const estree = parseCode(code);
-  if (estree.type !== 'Program') {
-    throw new Error('patchRendererConfig: Vite config not valid');
-  }
-  // Why acorn not have its type defination?
-  return '';
+  return code;
 };
 
 export const patchRendererConfigFrom = async (path: string, config: PromptAnswers) => {
