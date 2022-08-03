@@ -4,7 +4,7 @@ import { gitCloneTo } from 'src/app/execuator/git';
 import { pathExist } from 'src/app/validate/name';
 
 export const TEST_NAME = 'test-repo';
-export const TEST_NAME_ORIGINAL = `${TEST_NAME}-orignal`;
+export const TEST_NAME_ORIGINAL = `${TEST_NAME}-original`;
 
 const dest = path.resolve('test/repo', TEST_NAME_ORIGINAL);
 
