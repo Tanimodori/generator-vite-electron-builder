@@ -1,4 +1,4 @@
-import { Options } from 'acorn';
+import type { Options } from 'acorn';
 import * as ESTree from 'estree';
 
 declare module 'acorn' {
