@@ -56,3 +56,5 @@ export const modifyString = (source: string) => {
   };
   return result;
 };
+
+export type StringBuilder = ReturnType<typeof modifyString>;

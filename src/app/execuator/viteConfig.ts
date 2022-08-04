@@ -1,8 +1,8 @@
 import { PromptAnswers } from '../prompts';
 import { parse, type AcornComment } from 'acorn';
 import fs from 'fs';
-import type { ImportDeclaration } from 'estree';
-import { modifyString } from './stringModification';
+import type { ImportDeclaration, Program } from 'estree';
+import { modifyString, type StringBuilder } from './stringModification';
 
 export const parseCode = (code: string) => {
   const comments: AcornComment[] = [];
@@ -15,13 +15,7 @@ export const parseCode = (code: string) => {
   return program;
 };
 
-export const patchRendererConfig = (code: string, config: PromptAnswers) => {
-  // modify only tailwindcss is included
-  if (config.css.indexOf('tailwindcss') === -1) {
-    return code;
-  }
-  const estree = parseCode(code);
-  const patchedCode = modifyString(code);
+export const insertImports = (estree: Program, builder: StringBuilder, codeToInsert: string) => {
   // find last import from latest import block
   let lastImport: ImportDeclaration | null = null;
   for (const statement of estree.body) {
@@ -43,8 +37,18 @@ export const patchRendererConfig = (code: string, config: PromptAnswers) => {
     // Or add to the last import
     insertPos = lastImport.end;
   }
-  patchedCode.insert(insertPos, `import WindiCSS from 'vite-plugin-windicss';\n`);
-  return patchedCode.apply();
+  builder.insert(insertPos, codeToInsert);
+};
+
+export const patchRendererConfig = (code: string, config: PromptAnswers) => {
+  // modify only tailwindcss is included
+  if (config.css.indexOf('tailwindcss') === -1) {
+    return code;
+  }
+  const estree = parseCode(code);
+  const builder = modifyString(code);
+  insertImports(estree, builder, `import WindiCSS from 'vite-plugin-windicss';\n`);
+  return builder.apply();
 };
 
 export const patchRendererConfigFrom = async (path: string, config: PromptAnswers) => {
