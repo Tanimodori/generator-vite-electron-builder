@@ -1,5 +1,5 @@
 import { PromptAnswers } from '../prompts';
-import { parse, type AcornComment, type ExtendNode } from 'acorn';
+import { parse, type AcornComment } from 'acorn';
 import fs from 'fs';
 import type { ImportDeclaration } from 'estree';
 import { modifyString } from './stringModification';
@@ -23,7 +23,7 @@ export const patchRendererConfig = (code: string, config: PromptAnswers) => {
   const estree = parseCode(code);
   const patchedCode = modifyString(code);
   // find last import from latest import block
-  let lastImport: ExtendNode<ImportDeclaration> | null = null;
+  let lastImport: ImportDeclaration | null = null;
   for (const statement of estree.body) {
     if (statement.type === 'ImportDeclaration') {
       lastImport = statement;
