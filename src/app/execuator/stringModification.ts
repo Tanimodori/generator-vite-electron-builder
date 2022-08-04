@@ -12,6 +12,7 @@ export const modifyString = (source: string) => {
     a.start <= b.end && b.start <= a.end;
   const mods: StringModification[] = [];
   const result = {
+    source,
     insert(start: number, code: string) {
       mods.push({ start, end: start, replaceCode: code });
       return result;
