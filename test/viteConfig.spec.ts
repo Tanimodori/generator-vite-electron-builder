@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { modifyString } from 'src/app/execuator/stringModification';
-import { parseCode, insertImports } from 'src/app/execuator/viteConfig';
+import { parseCode, insertImports, insertVitePlugins } from 'src/app/execuator/viteConfig';
 import { describe, expect, it } from 'vitest';
 import { REPO_DIR, TEST_NAME_ORIGINAL } from './setup';
 
@@ -41,9 +41,29 @@ const config = {
 `;
     const estree = parseCode(exampleCode);
     const builder = modifyString(exampleCode);
-    insertImports(estree, builder, "\nimport {bar} from 'foo';");
+    insertImports(estree, builder, "import {bar} from 'foo';\n");
     expect(builder.apply()).toBe(expectedCode);
-    console.log(estree);
+  });
+
+  it('can insert plugin', () => {
+    const expectedCode = `
+import {foo} from 'bar';
+
+const config = {
+  foo: 0,
+  bar: {
+    baz: null,
+  },
+  plugins: [
+    vue(),
+    foo(),
+  ],
+};
+`;
+    const estree = parseCode(exampleCode);
+    const builder = modifyString(exampleCode);
+    insertVitePlugins(estree, builder, '\n    foo(),');
+    expect(builder.apply()).toBe(expectedCode);
   });
 
   it('can transform actual config', async () => {
