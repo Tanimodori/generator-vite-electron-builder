@@ -40,6 +40,14 @@ export const insertImports = (estree: Program, builder: StringBuilder, codeToIns
   builder.insert(insertPos, codeToInsert);
 };
 
+export const insertVitePlugins = (
+  estree: Program,
+  builder: StringBuilder,
+  codeToInsert: string,
+) => {
+  console.log('Not implemented');
+};
+
 export const patchRendererConfig = (code: string, config: PromptAnswers) => {
   // modify only tailwindcss is included
   if (config.css.indexOf('tailwindcss') === -1) {
@@ -47,7 +55,7 @@ export const patchRendererConfig = (code: string, config: PromptAnswers) => {
   }
   const estree = parseCode(code);
   const builder = modifyString(code);
-  insertImports(estree, builder, `import WindiCSS from 'vite-plugin-windicss';\n`);
+  insertImports(estree, builder, `\nimport WindiCSS from 'vite-plugin-windicss';`);
   return builder.apply();
 };
 
