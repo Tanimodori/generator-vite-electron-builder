@@ -35,7 +35,7 @@ export const insertImports = (estree: Program, builder: StringBuilder, codeToIns
     }
   } else {
     // Or add to the last import
-    insertPos = lastImport.end;
+    insertPos = lastImport.end + 1;
   }
   builder.insert(insertPos, codeToInsert);
 };
@@ -45,7 +45,48 @@ export const insertVitePlugins = (
   builder: StringBuilder,
   codeToInsert: string,
 ) => {
-  console.log('Not implemented');
+  for (const node of estree.body) {
+    // find 'config'
+    if (node.type === 'VariableDeclaration') {
+      const decl = node.declarations[0];
+      if (
+        decl.id.type !== 'Identifier' ||
+        decl.id.name !== 'config' ||
+        !decl.init ||
+        decl.init.type !== 'ObjectExpression'
+      ) {
+        continue;
+      }
+      // find 'config.plugins'
+      for (const property of decl.init.properties) {
+        if (
+          property.type !== 'Property' ||
+          property.key.type !== 'Identifier' ||
+          property.key.name !== 'plugins' ||
+          property.value.type !== 'ArrayExpression'
+        ) {
+          continue;
+        }
+        // find last element of 'config.plugins'
+        let insertPos = -1;
+        for (const element of property.value.elements) {
+          if (element) {
+            insertPos = element.end + 1;
+            // trailing comma
+            if (builder.source[insertPos + 1] === ',') {
+              insertPos++;
+            }
+          }
+        }
+        if (insertPos === -1) {
+          insertPos = property.value.start + 1;
+          builder.insert(insertPos, codeToInsert + `\n  `);
+        } else {
+          builder.insert(insertPos, codeToInsert);
+        }
+      }
+    }
+  }
 };
 
 export const patchRendererConfig = (code: string, config: PromptAnswers) => {
@@ -55,7 +96,8 @@ export const patchRendererConfig = (code: string, config: PromptAnswers) => {
   }
   const estree = parseCode(code);
   const builder = modifyString(code);
-  insertImports(estree, builder, `\nimport WindiCSS from 'vite-plugin-windicss';`);
+  insertImports(estree, builder, `import WindiCSS from 'vite-plugin-windicss';\n`);
+  insertVitePlugins(estree, builder, `\n    WindiCSS(),`);
   return builder.apply();
 };
 
