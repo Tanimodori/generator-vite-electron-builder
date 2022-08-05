@@ -1,23 +1,18 @@
 import { PromptAnswers } from '../prompts';
-import { parse, type AcornComment } from 'acorn';
 import fs from 'fs';
-import type { ImportDeclaration, Program } from 'estree';
 import { modifyString, type StringBuilder } from './stringModification';
+import { parse } from '@typescript-eslint/typescript-estree';
+import { TSESTree } from '@typescript-eslint/types';
 
 export const parseCode = (code: string) => {
-  const comments: AcornComment[] = [];
-  const program = parse(code, {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    onComment: comments,
-  });
-  program.comments = comments;
-  return program;
+  return parse(code, { comment: true, loc: true, range: true });
 };
+
+export type Program = ReturnType<typeof parseCode>;
 
 export const insertImports = (estree: Program, builder: StringBuilder, codeToInsert: string) => {
   // find last import from latest import block
-  let lastImport: ImportDeclaration | null = null;
+  let lastImport: TSESTree.ImportDeclaration | null = null;
   for (const statement of estree.body) {
     if (statement.type === 'ImportDeclaration') {
       lastImport = statement;
@@ -29,13 +24,13 @@ export const insertImports = (estree: Program, builder: StringBuilder, codeToIns
     // If no import found, add after first line comment
     if (estree.comments && estree.comments.length > 0) {
       const firstComment = estree.comments[0];
-      if (firstComment.start === 0) {
-        insertPos = firstComment.end;
+      if (firstComment.range[0] === 0) {
+        insertPos = firstComment.range[1];
       }
     }
   } else {
     // Or add to the last import
-    insertPos = lastImport.end + 1;
+    insertPos = lastImport.range[1] + 1;
   }
   builder.insert(insertPos, codeToInsert);
 };
@@ -71,7 +66,7 @@ export const insertVitePlugins = (
         let insertPos = -1;
         for (const element of property.value.elements) {
           if (element) {
-            insertPos = element.end + 1;
+            insertPos = element.range[1] + 1;
             // trailing comma
             if (builder.source[insertPos + 1] === ',') {
               insertPos++;
@@ -79,7 +74,7 @@ export const insertVitePlugins = (
           }
         }
         if (insertPos === -1) {
-          insertPos = property.value.start + 1;
+          insertPos = property.value.range[0] + 1;
           builder.insert(insertPos, codeToInsert + `\n  `);
         } else {
           builder.insert(insertPos, codeToInsert);
