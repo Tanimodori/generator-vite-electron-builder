@@ -1,20 +1,42 @@
+import { TSESTree } from '@typescript-eslint/types';
 import fs from 'fs';
 import path from 'path';
-import { modifyString } from 'src/app/execuator/stringModification';
+import { modifyString, StringBuilder } from 'src/app/execuator/stringModification';
 import { parseCode } from 'src/app/execuator/typescript';
 import {
   patchRendererConfig,
   insertImports,
   insertVitePlugins,
 } from 'src/app/execuator/viteConfig';
-import { describe, expect, it } from 'vitest';
+import { PromptAnswers } from 'src/app/prompts';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { REPO_DIR, TEST_NAME_ORIGINAL } from './setup';
 
-const src = path.resolve(REPO_DIR, TEST_NAME_ORIGINAL);
-const viteConfigPath = 'packages/renderer/vite.config.js';
-const srcViteConfigPath = path.resolve(src, viteConfigPath);
+const configWithoutWindiCSS: PromptAnswers = {
+  id: 'test',
+  eslint: false,
+  prettier: false,
+  prettierStyle: 'noop',
+  css: [],
+  test: [],
+  devtools: 'noop',
+};
+const configWithWindiCSS: PromptAnswers = {
+  ...configWithoutWindiCSS,
+  css: [...configWithoutWindiCSS.css, 'windicss'],
+};
 
-const exampleCode = `
+// vitest test context
+declare module 'vitest' {
+  export interface TestContext {
+    estree: TSESTree.Program;
+    builder: StringBuilder;
+    source: string;
+  }
+}
+
+describe('vite.config.js Unit Test (Simple)', () => {
+  const exampleCode = `
 import {foo} from 'bar';
 
 const config = {
@@ -28,8 +50,12 @@ const config = {
 };
 `;
 
-describe('vite.config.js Test', () => {
-  it('can insert import', () => {
+  beforeEach((context) => {
+    context.estree = parseCode(exampleCode);
+    context.builder = modifyString(exampleCode);
+  });
+
+  it('can insert import', (context) => {
     const expectedCode = `
 import {foo} from 'bar';
 import {bar} from 'foo';
@@ -44,13 +70,11 @@ const config = {
   ],
 };
 `;
-    const estree = parseCode(exampleCode);
-    const builder = modifyString(exampleCode);
-    insertImports(estree, builder, "import {bar} from 'foo';\n");
-    expect(builder.apply()).toBe(expectedCode);
+    insertImports(context.estree, context.builder, "import {bar} from 'foo';\n");
+    expect(context.builder.apply()).toBe(expectedCode);
   });
 
-  it('can insert plugin', () => {
+  it('can insert plugin', (context) => {
     const expectedCode = `
 import {foo} from 'bar';
 
@@ -65,19 +89,27 @@ const config = {
   ],
 };
 `;
-    const estree = parseCode(exampleCode);
-    const builder = modifyString(exampleCode);
-    insertVitePlugins(estree, builder, '\n    foo(),');
-    expect(builder.apply()).toBe(expectedCode);
+    insertVitePlugins(context.estree, context.builder, '\n    foo(),');
+    expect(context.builder.apply()).toBe(expectedCode);
   });
+});
 
-  it('can transform actual config', async () => {
+describe('vite.config.js Unit Test (Actual)', () => {
+  beforeEach(async (context) => {
+    // construct viteConfigPath
+    const src = path.resolve(REPO_DIR, TEST_NAME_ORIGINAL);
+    const viteConfigPath = 'packages/renderer/vite.config.js';
+    const srcViteConfigPath = path.resolve(src, viteConfigPath);
+
+    // read file content
     const buffer = await fs.promises.readFile(srcViteConfigPath);
-    expect(buffer.length).toBeGreaterThan(0);
     const srcViteConfig = buffer.toString();
-    expect(srcViteConfig.length).toBeGreaterThan(0);
 
-    const patchedViteConfig = patchRendererConfig(srcViteConfig, { css: ['windicss'] });
+    // prepare testing context
+    context.source = srcViteConfig;
+  });
+  it('can transform actual config', async (context) => {
+    const patchedViteConfig = patchRendererConfig(context.source, configWithWindiCSS);
     expect(patchedViteConfig).toBeTruthy();
     console.log(patchedViteConfig);
   });
