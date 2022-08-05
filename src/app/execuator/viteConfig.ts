@@ -90,8 +90,8 @@ export const insertVitePlugins = (
 };
 
 export const patchRendererConfig = (code: string, config: PromptAnswers) => {
-  // modify only tailwindcss is included
-  if (config.css.indexOf('tailwindcss') === -1) {
+  // modify only windicss is included
+  if (config.css.indexOf('windicss') === -1) {
     return code;
   }
   const estree = parseCode(code);

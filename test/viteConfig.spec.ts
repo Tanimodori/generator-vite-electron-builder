@@ -1,7 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import { modifyString } from 'src/app/execuator/stringModification';
-import { parseCode, insertImports, insertVitePlugins } from 'src/app/execuator/viteConfig';
+import {
+  parseCode,
+  patchRendererConfig,
+  insertImports,
+  insertVitePlugins,
+} from 'src/app/execuator/viteConfig';
 import { describe, expect, it } from 'vitest';
 import { REPO_DIR, TEST_NAME_ORIGINAL } from './setup';
 
@@ -72,7 +77,8 @@ const config = {
     const srcViteConfig = buffer.toString();
     expect(srcViteConfig.length).toBeGreaterThan(0);
 
-    const estree = parseCode(srcViteConfig);
-    expect(estree).toBeTruthy();
+    const patchedViteConfig = patchRendererConfig(srcViteConfig, { css: ['windicss'] });
+    expect(patchedViteConfig).toBeTruthy();
+    console.log(patchedViteConfig);
   });
 });

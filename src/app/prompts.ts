@@ -8,7 +8,7 @@ export interface PromptAnswers {
   prettier: boolean;
   prettierStyle: 'original' | 'community' | 'noop';
   test: ('unit' | 'e2e')[];
-  css: ('tailwindcss' | 'less' | 'saas')[];
+  css: ('windicss' | 'less' | 'saas')[];
   devtools: 'online' | 'local' | 'noop';
 }
 
@@ -80,8 +80,8 @@ export const getPrompts = (dest: string): Question<PromptAnswers> => {
       message: 'CSS features?',
       choices: [
         {
-          name: 'TailwindCSS',
-          value: 'tailwindcss',
+          name: 'WindiCSS',
+          value: 'windicss',
         },
         {
           name: 'Less',
