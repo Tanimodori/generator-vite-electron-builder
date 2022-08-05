@@ -1,7 +1,6 @@
-import { TSESTree } from '@typescript-eslint/types';
 import fs from 'fs';
 import path from 'path';
-import { modifyString, StringBuilder } from 'src/app/execuator/stringModification';
+import { modifyString } from 'src/app/execuator/stringModification';
 import { parseCode } from 'src/app/execuator/typescript';
 import {
   patchRendererConfig,
@@ -9,7 +8,9 @@ import {
   insertVitePlugins,
 } from 'src/app/execuator/viteConfig';
 import { PromptAnswers } from 'src/app/prompts';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { StringBuilder } from 'src/app/execuator/stringModification';
+import type { TSESTree } from '@typescript-eslint/types';
+import { beforeEach, describe, expect, it, TestFunction } from 'vitest';
 import { REPO_DIR, TEST_NAME_ORIGINAL } from './setup';
 
 const configWithoutWindiCSS: PromptAnswers = {
@@ -26,17 +27,21 @@ const configWithWindiCSS: PromptAnswers = {
   css: [...configWithoutWindiCSS.css, 'windicss'],
 };
 
-// vitest test context
-declare module 'vitest' {
-  export interface TestContext {
-    estree: TSESTree.Program;
-    builder: StringBuilder;
-    source: string;
-  }
-}
+type BeforeEachFunction<T = unknown> = Parameters<typeof beforeEach>[0] extends (
+  context: infer C,
+  ...args: infer P
+) => infer R
+  ? (context: C & T, ...args: P) => R
+  : never;
 
 describe('vite.config.js Unit Test (Simple)', () => {
-  const exampleCode = `
+  interface LocalTestContext {
+    estree: TSESTree.Program;
+    builder: StringBuilder;
+  }
+
+  beforeEach(((context) => {
+    const exampleCode = `
 import {foo} from 'bar';
 
 const config = {
@@ -49,13 +54,11 @@ const config = {
   ],
 };
 `;
-
-  beforeEach((context) => {
     context.estree = parseCode(exampleCode);
     context.builder = modifyString(exampleCode);
-  });
+  }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
 
-  it('can insert import', (context) => {
+  it('can insert import', ((context) => {
     const expectedCode = `
 import {foo} from 'bar';
 import {bar} from 'foo';
@@ -72,9 +75,9 @@ const config = {
 `;
     insertImports(context.estree, context.builder, "import {bar} from 'foo';\n");
     expect(context.builder.apply()).toBe(expectedCode);
-  });
+  }) as TestFunction<LocalTestContext> as TestFunction);
 
-  it('can insert plugin', (context) => {
+  it('can insert plugin', ((context) => {
     const expectedCode = `
 import {foo} from 'bar';
 
@@ -91,11 +94,15 @@ const config = {
 `;
     insertVitePlugins(context.estree, context.builder, '\n    foo(),');
     expect(context.builder.apply()).toBe(expectedCode);
-  });
+  }) as TestFunction<LocalTestContext> as TestFunction);
 });
 
 describe('vite.config.js Unit Test (Actual)', () => {
-  beforeEach(async (context) => {
+  interface LocalTestContext {
+    source: string;
+  }
+
+  beforeEach((async (context) => {
     // construct viteConfigPath
     const src = path.resolve(REPO_DIR, TEST_NAME_ORIGINAL);
     const viteConfigPath = 'packages/renderer/vite.config.js';
@@ -107,10 +114,10 @@ describe('vite.config.js Unit Test (Actual)', () => {
 
     // prepare testing context
     context.source = srcViteConfig;
-  });
-  it('can transform actual config', async (context) => {
+  }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
+  it('can transform actual config', (async (context) => {
     const patchedViteConfig = patchRendererConfig(context.source, configWithWindiCSS);
     expect(patchedViteConfig).toBeTruthy();
     console.log(patchedViteConfig);
-  });
+  }) as TestFunction<LocalTestContext> as TestFunction);
 });
