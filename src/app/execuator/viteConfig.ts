@@ -1,16 +1,14 @@
 import { PromptAnswers } from '../prompts';
 import fs from 'fs';
 import { modifyString, type StringBuilder } from './stringModification';
-import { parse } from '@typescript-eslint/typescript-estree';
 import { TSESTree } from '@typescript-eslint/types';
+import { parseCode } from './typescript';
 
-export const parseCode = (code: string) => {
-  return parse(code, { comment: true, loc: true, range: true });
-};
-
-export type Program = ReturnType<typeof parseCode>;
-
-export const insertImports = (estree: Program, builder: StringBuilder, codeToInsert: string) => {
+export const insertImports = (
+  estree: TSESTree.Program,
+  builder: StringBuilder,
+  codeToInsert: string,
+) => {
   // find last import from latest import block
   let lastImport: TSESTree.ImportDeclaration | null = null;
   for (const statement of estree.body) {
@@ -36,7 +34,7 @@ export const insertImports = (estree: Program, builder: StringBuilder, codeToIns
 };
 
 export const insertVitePlugins = (
-  estree: Program,
+  estree: TSESTree.Program,
   builder: StringBuilder,
   codeToInsert: string,
 ) => {
