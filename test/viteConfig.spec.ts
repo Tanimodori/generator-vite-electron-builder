@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { modifyString } from 'src/app/execuator/stringModification';
+import { parseCode } from 'src/app/execuator/typescript';
 import {
-  parseCode,
   patchRendererConfig,
   insertImports,
   insertVitePlugins,
