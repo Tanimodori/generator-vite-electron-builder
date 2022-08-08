@@ -1,15 +1,11 @@
 import { PromptAnswers } from '../prompts';
-import fs from 'fs';
 import { modifyString, type StringBuilder } from './stringModification';
 import { TSESTree } from '@typescript-eslint/types';
 import { parseCode } from './typescript';
 import { transformFile } from './fs';
 
-export const insertImports = (
-  estree: TSESTree.Program,
-  builder: StringBuilder,
-  codeToInsert: string,
-) => {
+/** Find the position to insert imports */
+export const findInsertImportsPos = (estree: TSESTree.Program): number => {
   // find last import from latest import block
   let lastImport: TSESTree.ImportDeclaration | null = null;
   for (const statement of estree.body) {
@@ -31,14 +27,23 @@ export const insertImports = (
     // Or add to the last import
     insertPos = lastImport.range[1] + 1;
   }
-  builder.insert(insertPos, codeToInsert);
+  return insertPos;
 };
 
-export const insertVitePlugins = (
+/** Insert imports code */
+export const insertImports = (
   estree: TSESTree.Program,
   builder: StringBuilder,
   codeToInsert: string,
 ) => {
+  builder.insert(findInsertImportsPos(estree), codeToInsert);
+};
+
+/** Find the position to insert vite plugins */
+export const findInsertVitePluginsPos = (
+  estree: TSESTree.Program,
+  src: string,
+): { pos: number; pluginEmpty: boolean } => {
   for (const node of estree.body) {
     // find 'config'
     if (node.type === 'VariableDeclaration') {
@@ -67,22 +72,41 @@ export const insertVitePlugins = (
           if (element) {
             insertPos = element.range[1] + 1;
             // trailing comma
-            if (builder.source[insertPos + 1] === ',') {
+            if (src[insertPos + 1] === ',') {
               insertPos++;
             }
           }
         }
         if (insertPos === -1) {
           insertPos = property.value.range[0] + 1;
-          builder.insert(insertPos, codeToInsert + `\n  `);
+          return { pos: insertPos, pluginEmpty: true };
         } else {
-          builder.insert(insertPos, codeToInsert);
+          return { pos: insertPos, pluginEmpty: false };
         }
       }
     }
   }
+  return { pos: -1, pluginEmpty: false };
 };
 
+/** Insert vite plugins */
+export const insertVitePlugins = (
+  estree: TSESTree.Program,
+  builder: StringBuilder,
+  codeToInsert: string,
+) => {
+  const { pos, pluginEmpty } = findInsertVitePluginsPos(estree, builder.source);
+  if (pos === -1) {
+    throw new Error('Cannot insert VitePlugins.');
+  } else {
+    if (pluginEmpty) {
+      codeToInsert += `\n  `;
+    }
+    builder.insert(pos, codeToInsert);
+  }
+};
+
+/** Transform string */
 export const patchRendererConfig = (code: string, config: PromptAnswers) => {
   // modify only windicss is included
   if (config.css.indexOf('windicss') === -1) {
@@ -95,6 +119,7 @@ export const patchRendererConfig = (code: string, config: PromptAnswers) => {
   return builder.apply();
 };
 
+/** Transform file */
 export const patchRendererConfigFrom = async (path: string, config: PromptAnswers) => {
   await transformFile(path, (src) => patchRendererConfig(src, config));
 };
