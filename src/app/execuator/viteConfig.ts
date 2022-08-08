@@ -39,13 +39,9 @@ export const insertImports = (
   builder.insert(findInsertImportsPos(estree), codeToInsert);
 };
 
-/** Find the position to insert vite plugins */
-export const findInsertVitePluginsPos = (
-  estree: TSESTree.Program,
-  src: string,
-): { pos: number; pluginEmpty: boolean } => {
-  for (const node of estree.body) {
-    // find 'config'
+/** Find 'config'  */
+const findConfigDeclaration = (program: TSESTree.Program) => {
+  for (const node of program.body) {
     if (node.type === 'VariableDeclaration') {
       const decl = node.declarations[0];
       if (
@@ -56,37 +52,62 @@ export const findInsertVitePluginsPos = (
       ) {
         continue;
       }
-      // find 'config.plugins'
-      for (const property of decl.init.properties) {
-        if (
-          property.type !== 'Property' ||
-          property.key.type !== 'Identifier' ||
-          property.key.name !== 'plugins' ||
-          property.value.type !== 'ArrayExpression'
-        ) {
-          continue;
-        }
-        // find last element of 'config.plugins'
-        let insertPos = -1;
-        for (const element of property.value.elements) {
-          if (element) {
-            insertPos = element.range[1] + 1;
-            // trailing comma
-            if (src[insertPos + 1] === ',') {
-              insertPos++;
-            }
-          }
-        }
-        if (insertPos === -1) {
-          insertPos = property.value.range[0] + 1;
-          return { pos: insertPos, pluginEmpty: true };
-        } else {
-          return { pos: insertPos, pluginEmpty: false };
-        }
+      return decl.init;
+    }
+  }
+  return null;
+};
+
+/** Find 'config.plugins' */
+const findPlugins = (config: TSESTree.ObjectExpression) => {
+  for (const property of config.properties) {
+    if (
+      property.type !== 'Property' ||
+      property.key.type !== 'Identifier' ||
+      property.key.name !== 'plugins' ||
+      property.value.type !== 'ArrayExpression'
+    ) {
+      continue;
+    }
+    return property.value;
+  }
+  return null;
+};
+
+/** Find last element of 'config.plugins' */
+const findLastPluginPos = (plugins: TSESTree.ArrayExpression, src: string) => {
+  let insertPos = -1;
+  for (const element of plugins.elements) {
+    if (element) {
+      insertPos = element.range[1] + 1;
+      // trailing comma
+      if (src[insertPos + 1] === ',') {
+        insertPos++;
       }
     }
   }
-  return { pos: -1, pluginEmpty: false };
+  if (insertPos === -1) {
+    insertPos = plugins.range[0] + 1;
+    return { pos: insertPos, pluginEmpty: true };
+  } else {
+    return { pos: insertPos, pluginEmpty: false };
+  }
+};
+
+/** Find the position to insert vite plugins */
+export const findInsertVitePluginsPos = (
+  estree: TSESTree.Program,
+  src: string,
+): { pos: number; pluginEmpty: boolean } => {
+  const config = findConfigDeclaration(estree);
+  if (!config) {
+    throw new Error('Cannot find config while insert VitePlugins.');
+  }
+  const plugins = findPlugins(config);
+  if (!plugins) {
+    throw new Error('Cannot find plugins while insert VitePlugins.');
+  }
+  return findLastPluginPos(plugins, src);
 };
 
 /** Insert vite plugins */
@@ -96,14 +117,10 @@ export const insertVitePlugins = (
   codeToInsert: string,
 ) => {
   const { pos, pluginEmpty } = findInsertVitePluginsPos(estree, builder.source);
-  if (pos === -1) {
-    throw new Error('Cannot insert VitePlugins.');
-  } else {
-    if (pluginEmpty) {
-      codeToInsert += `\n  `;
-    }
-    builder.insert(pos, codeToInsert);
+  if (pluginEmpty) {
+    codeToInsert += `\n  `;
   }
+  builder.insert(pos, codeToInsert);
 };
 
 /** Transform string */
