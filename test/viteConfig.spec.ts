@@ -12,6 +12,7 @@ import type { StringBuilder } from 'src/app/execuator/stringModification';
 import type { TSESTree } from '@typescript-eslint/types';
 import { beforeEach, describe, expect, it, TestFunction } from 'vitest';
 import { REPO_DIR, TEST_NAME_ORIGINAL } from './setup';
+import { BeforeEachFunction } from './types';
 
 const configWithoutWindiCSS: PromptAnswers = {
   id: 'test',
@@ -26,13 +27,6 @@ const configWithWindiCSS: PromptAnswers = {
   ...configWithoutWindiCSS,
   css: [...configWithoutWindiCSS.css, 'windicss'],
 };
-
-type BeforeEachFunction<T = unknown> = Parameters<typeof beforeEach>[0] extends (
-  context: infer C,
-  ...args: infer P
-) => infer R
-  ? (context: C & T, ...args: P) => R
-  : never;
 
 describe('vite.config.js Unit Test (Simple)', () => {
   interface LocalTestContext {
