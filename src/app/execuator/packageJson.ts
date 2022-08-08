@@ -44,20 +44,54 @@ export const buildDevMods = (config: PromptAnswers) => {
   return depMods;
 };
 
+/** Extract Original devDependencies */
+export const extractOriginalDevDeps = (code: string): string[] => {
+  const original = parseJsonc(code);
+  for (const property of original?.children || []) {
+    if (property?.children?.[0]?.value !== 'devDependencies') {
+      continue;
+    }
+    const devDepNodes = property?.children?.[1]?.children || [];
+    return devDepNodes.map((x) => x.children?.[0]?.value).filter((x) => !!x);
+  }
+  return [];
+};
+
 /** patch 'devDependencies' */
 export const patchDevDependencies = (code: string, config: PromptAnswers) => {
-  const original = parseJsonc(code);
-  const devMods = buildDevMods(config);
-  console.log(devMods);
+  const depMods = buildDevMods(config);
+  const originalDevDeps = extractOriginalDevDeps(code);
+  const depAddition: string[] = [];
+
+  let patchedCode = code;
+  for (const key in depMods) {
+    const keyInstalled = originalDevDeps.includes(key);
+    if (depMods[key] && !keyInstalled) {
+      // devDep need to be installed
+      depAddition.push(key);
+    } else if (!depMods[key] && keyInstalled) {
+      // devDep need to be uninstalled
+      patchedCode = editJsonc(patchedCode, ['devDependencies', key], undefined, {});
+    }
+  }
+
+  return { code: patchedCode, addition: depAddition };
 };
 
 /** Transform string */
 export const patchPackageJson = (code: string, config: PromptAnswers) => {
-  patchDevDependencies(code, config);
-  return code;
+  const result = patchDevDependencies(code, config);
+  console.log(result);
+  return result;
 };
 
 /** Transform file */
 export const patchPackageJsonFrom = async (path: string, config: PromptAnswers) => {
-  await transformFile(path, (src) => patchPackageJson(src, config));
+  let addition: string[] = [];
+  await transformFile(path, (src) => {
+    const result = patchPackageJson(src, config);
+    addition = result.addition;
+    return result.code;
+  });
+  return addition;
 };
