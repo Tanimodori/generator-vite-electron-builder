@@ -129,10 +129,16 @@ export const patchScripts = (code: string, config: PromptAnswers) => {
   return patchedCode;
 };
 
+/** patch 'name' */
+export const patchName = (code: string, config: PromptAnswers) => {
+  return editJsonc(code, ['name'], config.id, {});
+};
+
 /** Transform string */
 export const patchPackageJson = (code: string, config: PromptAnswers) => {
   const result = patchDevDependencies(code, config);
-  console.log(result);
+  result.code = patchScripts(result.code, config);
+  result.code = patchName(result.code, config);
   return result;
 };
 

@@ -7,6 +7,7 @@ import {
   featDeps,
   featScripts,
   patchDevDependencies,
+  patchName,
   patchScripts,
 } from 'src/app/execuator/packageJson';
 import { PromptAnswers } from 'src/app/prompts';
@@ -90,5 +91,10 @@ describe('package.json Unit Test (Actual)', async () => {
     expect(fullScript).toSatisfy((scripts: string) =>
       allTestTasks.every((task) => scripts.includes(task)),
     );
+  });
+
+  it('should edit package.json name correctly', async () => {
+    const noopResult = patchName(packageJson, configNoop);
+    expect(noopResult.includes(`"name": "${configNoop.id}",`)).toBe(true);
   });
 });
