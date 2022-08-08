@@ -1,6 +1,3 @@
-import path from 'path';
-import fs from 'fs';
-import { REPO_DIR, TEST_NAME_ORIGINAL } from './setup';
 import { beforeAll, beforeEach, describe, it, TestFunction, expect } from 'vitest';
 import {
   buildDevMods,
@@ -12,6 +9,7 @@ import {
 } from 'src/app/execuator/packageJson';
 import { PromptAnswers } from 'src/app/prompts';
 import { BeforeEachFunction } from './types';
+import { loadOriginalRepoFile } from './utils';
 
 const configNoop: PromptAnswers = {
   id: 'test',
@@ -50,11 +48,7 @@ describe('package.json Unit Test (Actual)', async () => {
   };
 
   beforeAll(async () => {
-    // construct viteConfigPath
-    const packageJsonPath = path.resolve(REPO_DIR, TEST_NAME_ORIGINAL, 'package.json');
-    // read file content
-    const buffer = await fs.promises.readFile(packageJsonPath);
-    packageJson = buffer.toString();
+    packageJson = await loadOriginalRepoFile('package.json');
   });
 
   beforeEach(((context) => {

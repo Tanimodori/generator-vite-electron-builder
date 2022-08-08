@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import { modifyString } from 'src/app/execuator/stringModification';
 import { parseCode } from 'src/app/execuator/typescript';
 import {
@@ -10,9 +8,9 @@ import {
 import { PromptAnswers } from 'src/app/prompts';
 import type { StringBuilder } from 'src/app/execuator/stringModification';
 import type { TSESTree } from '@typescript-eslint/types';
-import { beforeEach, describe, expect, it, TestFunction } from 'vitest';
-import { REPO_DIR, TEST_NAME_ORIGINAL } from './setup';
+import { beforeAll, beforeEach, describe, expect, it, TestFunction } from 'vitest';
 import { BeforeEachFunction } from './types';
+import { loadOriginalRepoFile } from './utils';
 
 const configWithoutWindiCSS: PromptAnswers = {
   id: 'test',
@@ -96,19 +94,16 @@ describe('vite.config.js Unit Test (Actual)', () => {
     source: string;
   }
 
+  let source = '';
+
+  beforeAll(async () => {
+    source = await loadOriginalRepoFile('packages/renderer/vite.config.js');
+  });
+
   beforeEach((async (context) => {
-    // construct viteConfigPath
-    const src = path.resolve(REPO_DIR, TEST_NAME_ORIGINAL);
-    const viteConfigPath = 'packages/renderer/vite.config.js';
-    const srcViteConfigPath = path.resolve(src, viteConfigPath);
-
-    // read file content
-    const buffer = await fs.promises.readFile(srcViteConfigPath);
-    const srcViteConfig = buffer.toString();
-
-    // prepare testing context
-    context.source = srcViteConfig;
+    context.source = source;
   }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
+
   it('can transform actual config with windicss', (async (context) => {
     const patchedViteConfig = patchRendererConfig(context.source, configWithWindiCSS);
     expect(patchedViteConfig).toContain('WindiCSS');
