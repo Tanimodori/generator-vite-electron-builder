@@ -16,7 +16,7 @@ export const validateProjectName = async (name: string, dest: string): Promise<t
     return 'Project name is not a valid npm package name';
   }
   if (await pathExist(dest)) {
-    return `Path ${name} is not empty, please try another name`;
+    return `Path ${dest} is not empty, please try another name`;
   }
   return true;
 };

@@ -20,7 +20,7 @@ export const getPrompts = (dest: string): Question<PromptAnswers> => {
       message: 'Project Name?',
       transformer: (id: string) => id.trim(),
       validate: async (input: string) => {
-        return validateProjectName(input, path.resolve(input, dest));
+        return validateProjectName(input, path.resolve(dest, input));
       },
       default: 'vite-electron-builder',
     },
