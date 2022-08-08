@@ -3,6 +3,7 @@ import fs from 'fs';
 import { modifyString, type StringBuilder } from './stringModification';
 import { TSESTree } from '@typescript-eslint/types';
 import { parseCode } from './typescript';
+import { transformFile } from './fs';
 
 export const insertImports = (
   estree: TSESTree.Program,
@@ -95,8 +96,5 @@ export const patchRendererConfig = (code: string, config: PromptAnswers) => {
 };
 
 export const patchRendererConfigFrom = async (path: string, config: PromptAnswers) => {
-  const buffer = await fs.promises.readFile(path);
-  const viteConfig = buffer.toString();
-  const patchedViteConfig = patchRendererConfig(viteConfig, config);
-  await fs.promises.writeFile(path, patchedViteConfig);
+  await transformFile(path, (src) => patchRendererConfig(src, config));
 };
