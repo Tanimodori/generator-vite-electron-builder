@@ -8,7 +8,7 @@ export interface PromptAnswers {
   prettier: boolean;
   prettierStyle: 'original' | 'community' | 'noop';
   test: ('unit' | 'e2e')[];
-  css: ('windicss' | 'less' | 'saas')[];
+  css: ('windicss' | 'less' | 'sass')[];
   devtools: 'online' | 'local' | 'noop';
 }
 
@@ -89,7 +89,7 @@ export const getPrompts = (dest: string): Question<PromptAnswers> => {
         },
         {
           name: 'Sass/SCSS',
-          value: 'saas',
+          value: 'sass',
         },
       ],
     },
