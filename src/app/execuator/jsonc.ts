@@ -5,7 +5,9 @@ export const editJsonc = (...args: Parameters<typeof modify>) => {
     formattingOptions: {
       tabSize: 2,
       insertSpaces: true,
+      ...args[3]?.formattingOptions,
     },
+    ...args[3],
   };
   const edits = modify(...args);
   return applyEdits(args[0], edits);
