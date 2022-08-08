@@ -2,6 +2,19 @@ import { PromptAnswers } from '../prompts';
 import { transformFile } from './fs';
 import { editJsonc, parseJsonc } from './jsonc';
 
+export const featDeps = {
+  eslint: ['eslint', '@typescript-eslint/eslint-plugin', 'eslint-plugin-vue'],
+  prettier: ['prettier'],
+  eslintPrettier: ['eslint-config-prettier', 'eslint-plugin-prettier'],
+  test: ['vitest'],
+  unit: ['@vue/test-utils', 'happy-dom'],
+  e2e: ['playwright'],
+  windicss: ['windicss', 'vite-plugin-windicss'],
+  less: ['less'],
+  sass: ['sass'],
+  devtoolOnline: ['electron-devtools-installer'],
+};
+
 /** return a map of dep should be whether installed or removed */
 export const buildDevMods = (config: PromptAnswers) => {
   const depMods: Record<string, boolean> = {};
@@ -14,32 +27,22 @@ export const buildDevMods = (config: PromptAnswers) => {
   };
 
   // eslint & prettier
-  const eslintDeps = ['eslint', '@typescript-eslint/eslint-plugin', 'eslint-plugin-vue'];
-  const prettierDeps = ['prettier'];
-  const eslintPrettierDeps = ['eslint-config-prettier', 'eslint-plugin-prettier'];
-  markDep(config.eslint, eslintDeps);
-  markDep(config.prettier, prettierDeps);
-  markDep(config.eslint && config.prettier, eslintPrettierDeps);
+  markDep(config.eslint, featDeps.eslint);
+  markDep(config.prettier, featDeps.prettier);
+  markDep(config.eslint && config.prettier, featDeps.eslintPrettier);
 
   // test
-  const testDeps = ['vitest'];
-  const unitDeps = ['@vue/test-utils', 'happy-dom'];
-  const e2eDeps = ['playwright'];
-  markDep(config.test.length > 0, testDeps);
-  markDep(config.test.includes('unit'), unitDeps);
-  markDep(config.test.includes('e2e'), e2eDeps);
+  markDep(config.test.length > 0, featDeps.test);
+  markDep(config.test.includes('unit'), featDeps.unit);
+  markDep(config.test.includes('e2e'), featDeps.e2e);
 
   // CSS
-  const windicssDeps = ['windicss', 'vite-plugin-windicss'];
-  const lessDeps = ['less'];
-  const sassDeps = ['sass'];
-  markDep(config.css.includes('windicss'), windicssDeps);
-  markDep(config.css.includes('less'), lessDeps);
-  markDep(config.css.includes('sass'), sassDeps);
+  markDep(config.css.includes('windicss'), featDeps.windicss);
+  markDep(config.css.includes('less'), featDeps.less);
+  markDep(config.css.includes('sass'), featDeps.sass);
 
   // devtool
-  const devtoolOnlineDeps = ['electron-devtools-installer'];
-  markDep(config.devtools.includes('online'), devtoolOnlineDeps);
+  markDep(config.devtools.includes('online'), featDeps.devtoolOnline);
 
   return depMods;
 };
