@@ -115,9 +115,12 @@ describe('vite.config.js Unit Test (Actual)', () => {
     // prepare testing context
     context.source = srcViteConfig;
   }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
-  it('can transform actual config', (async (context) => {
+  it('can transform actual config with windicss', (async (context) => {
     const patchedViteConfig = patchRendererConfig(context.source, configWithWindiCSS);
-    expect(patchedViteConfig).toBeTruthy();
-    console.log(patchedViteConfig);
+    expect(patchedViteConfig).toContain('WindiCSS');
+  }) as TestFunction<LocalTestContext> as TestFunction);
+  it('can transform actual config with noop', (async (context) => {
+    const patchedViteConfig = patchRendererConfig(context.source, configWithoutWindiCSS);
+    expect(patchedViteConfig).not.toContain('WindiCSS');
   }) as TestFunction<LocalTestContext> as TestFunction);
 });
