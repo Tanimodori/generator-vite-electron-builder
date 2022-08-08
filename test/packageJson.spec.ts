@@ -5,8 +5,9 @@ import { beforeAll, beforeEach, describe, it, TestFunction, expect } from 'vites
 import {
   buildDevMods,
   featDeps,
+  featScripts,
   patchDevDependencies,
-  patchPackageJson,
+  patchScripts,
 } from 'src/app/execuator/packageJson';
 import { PromptAnswers } from 'src/app/prompts';
 import { BeforeEachFunction } from './types';
@@ -38,6 +39,14 @@ describe('package.json Unit Test (Actual)', async () => {
 
   let packageJson = '';
   const allFeatPackages = Object.values(featDeps).flat();
+  const allTestTasks = Object.values(featScripts.test).flat();
+
+  const getConfigSection = (json: string, section: string) => {
+    const endPattern = '\n  },\n';
+    const firstIndex = json.lastIndexOf(`"${section}"`);
+    const lastIndex = json.indexOf(endPattern, firstIndex) + endPattern.length;
+    return json.substring(firstIndex, lastIndex);
+  };
 
   beforeAll(async () => {
     // construct viteConfigPath
@@ -57,26 +66,29 @@ describe('package.json Unit Test (Actual)', async () => {
   });
 
   it('should edit package.json devDeps correctly', ((context) => {
-    const getDevDep = (json: string) => {
-      return json.substring(
-        json.lastIndexOf(`"devDependencies"`),
-        json.lastIndexOf(`"dependencies"`),
-      );
-    };
-
     const noopResult = patchDevDependencies(context.packageJson, configNoop);
-    const noopDevDep = getDevDep(noopResult.code);
+    const noopDevDep = getConfigSection(noopResult.code, 'devDependencies');
     expect(allFeatPackages.every((key) => !noopDevDep.includes(key))).toBe(true);
     expect(noopResult.addition.length).toBe(0);
 
     const fullResult = patchDevDependencies(context.packageJson, configFull);
-    const fullDevDep = getDevDep(fullResult.code);
+    const fullDevDep = getConfigSection(fullResult.code, 'devDependencies');
     expect(
       allFeatPackages.every((key) => fullDevDep.includes(key) || fullResult.addition.includes(key)),
     ).toBe(true);
   }) as TestFunction<LocalTestContext> as TestFunction);
 
-  it('should read package.json', async () => {
-    patchPackageJson(packageJson, configNoop);
+  it('should edit package.json scripts correctly', async () => {
+    const noopResult = patchScripts(packageJson, configNoop);
+    const noopScript = getConfigSection(noopResult, 'scripts');
+    expect(noopScript).toSatisfy((scripts: string) =>
+      allTestTasks.every((task) => !scripts.includes(task)),
+    );
+
+    const fullResult = patchScripts(packageJson, configFull);
+    const fullScript = getConfigSection(fullResult, 'scripts');
+    expect(fullScript).toSatisfy((scripts: string) =>
+      allTestTasks.every((task) => scripts.includes(task)),
+    );
   });
 });

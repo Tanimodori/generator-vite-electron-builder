@@ -1,3 +1,4 @@
+import { findNodeAtLocation } from 'jsonc-parser';
 import { PromptAnswers } from '../prompts';
 import { transformFile } from './fs';
 import { editJsonc, parseJsonc } from './jsonc';
@@ -79,6 +80,53 @@ export const patchDevDependencies = (code: string, config: PromptAnswers) => {
   }
 
   return { code: patchedCode, addition: depAddition };
+};
+
+export const featScripts = {
+  test: {
+    index: ['test'],
+    unit: ['test:main', 'test:preload', 'test:renderer'],
+    e2e: ['test:e2e'],
+  },
+};
+
+/** patch 'scripts' */
+export const patchScripts = (code: string, config: PromptAnswers) => {
+  let patchedCode = code;
+  if (config.test.length > 0) {
+    const node = parseJsonc(code);
+    if (!node) {
+      throw new Error('Cannot patch package.json scripts');
+    }
+    const allTestTasksStr: string = findNodeAtLocation(node, ['scripts', 'test'])?.value || '';
+    let allTestTasks = allTestTasksStr.split('&&').map((x) => x.trim());
+
+    // filter out test commands and tasks
+    for (const feat of ['unit', 'e2e'] as const) {
+      if (!config.test.includes(feat)) {
+        const featTaskRunCmds = featScripts.test[feat].map((task) => {
+          patchedCode = editJsonc(patchedCode, ['scripts', task], undefined, {});
+          return `npm run ${task}`;
+        });
+        allTestTasks = allTestTasks.filter((x) => !featTaskRunCmds.includes(x));
+      }
+    }
+
+    patchedCode = editJsonc(
+      patchedCode,
+      ['scripts', featScripts.test.index[0]],
+      allTestTasks.join(' && '),
+      {},
+    );
+  } else {
+    // no test
+    Object.values(featScripts.test)
+      .flat()
+      .forEach((task) => {
+        patchedCode = editJsonc(patchedCode, ['scripts', task], undefined, {});
+      });
+  }
+  return patchedCode;
 };
 
 /** Transform string */
