@@ -1,10 +1,10 @@
 import { modifyString } from 'src/app/execuator/stringModification';
 import { parseCode } from 'src/app/execuator/typescript';
 import {
-  patchRendererConfig,
   insertImports,
   insertVitePlugins,
-  rendererConfigPath,
+  patchViteConfig,
+  viteConfigPath,
 } from 'src/app/execuator/viteConfig';
 import { PromptAnswers } from 'src/app/prompts';
 import type { StringBuilder } from 'src/app/execuator/stringModification';
@@ -98,7 +98,7 @@ describe('vite.config.js Unit Test (Actual)', () => {
   let source = '';
 
   beforeAll(async () => {
-    source = await loadOriginalRepoFile(rendererConfigPath);
+    source = await loadOriginalRepoFile(viteConfigPath.renderer);
   });
 
   beforeEach((async (context) => {
@@ -106,11 +106,12 @@ describe('vite.config.js Unit Test (Actual)', () => {
   }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
 
   it('can transform actual config with windicss', (async (context) => {
-    const patchedViteConfig = patchRendererConfig(context.source, configWithWindiCSS);
+    const patchedViteConfig = patchViteConfig(context.source, configWithWindiCSS, 'renderer');
     expect(patchedViteConfig).toContain('WindiCSS');
   }) as TestFunction<LocalTestContext> as TestFunction);
+
   it('can transform actual config with noop', (async (context) => {
-    const patchedViteConfig = patchRendererConfig(context.source, configWithoutWindiCSS);
+    const patchedViteConfig = patchViteConfig(context.source, configWithoutWindiCSS, 'renderer');
     expect(patchedViteConfig).not.toContain('WindiCSS');
   }) as TestFunction<LocalTestContext> as TestFunction);
 });

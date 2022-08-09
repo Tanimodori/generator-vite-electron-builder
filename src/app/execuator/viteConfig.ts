@@ -5,7 +5,11 @@ import { parseCode } from './typescript';
 import { transformFile } from './fs';
 import path from 'path';
 
-export const rendererConfigPath = 'packages/renderer/vite.config.js';
+export const viteConfigPath = {
+  renderer: 'packages/renderer/vite.config.js',
+  preload: 'packages/preload/vite.config.js',
+  main: 'packages/main/vite.config.js',
+};
 
 /** Find the position to insert imports */
 export const findInsertImportsPos = (estree: TSESTree.Program): number => {
@@ -126,22 +130,34 @@ export const insertVitePlugins = (
   builder.insert(pos, codeToInsert);
 };
 
-/** Transform string */
-export const patchRendererConfig = (code: string, config: PromptAnswers) => {
-  // modify only windicss is included
-  if (config.css.indexOf('windicss') === -1) {
-    return code;
-  }
-  const estree = parseCode(code);
-  const builder = modifyString(code);
+export const insertWindicssPlugins = (estree: TSESTree.Program, builder: StringBuilder) => {
   insertImports(estree, builder, `import WindiCSS from 'vite-plugin-windicss';\n`);
   insertVitePlugins(estree, builder, `\n    WindiCSS(),`);
+};
+
+/** Transform string */
+export const patchViteConfig = (
+  code: string,
+  config: PromptAnswers,
+  type: 'main' | 'preload' | 'renderer',
+) => {
+  const estree = parseCode(code);
+  const builder = modifyString(code);
+  if (type === 'renderer') {
+    if (config.css.indexOf('windicss') !== -1) {
+      insertWindicssPlugins(estree, builder);
+    }
+  }
+
   return builder.apply();
 };
 
 /** Transform file */
-export const patchRendererConfigFrom = async (dest: string, config: PromptAnswers) => {
-  await transformFile(path.resolve(dest, rendererConfigPath), (src) =>
-    patchRendererConfig(src, config),
-  );
+export const patchViteConfigFrom = async (dest: string, config: PromptAnswers) => {
+  let key: keyof typeof viteConfigPath;
+  for (key in viteConfigPath) {
+    await transformFile(path.resolve(dest, viteConfigPath[key]), (src) =>
+      patchViteConfig(src, config, key),
+    );
+  }
 };
