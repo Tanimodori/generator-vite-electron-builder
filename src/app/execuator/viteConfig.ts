@@ -106,13 +106,13 @@ export const findInsertVitePluginsPos = (
   estree: TSESTree.Program,
   src: string,
 ): { pos: number; pluginEmpty: boolean } => {
-  const config = findConfigDeclaration(estree);
-  if (!config) {
-    throw new Error('Cannot find config while insert VitePlugins.');
+  const configDecl = findConfigDeclaration(estree);
+  if (!configDecl) {
+    throw new Error('Cannot find vite config while insert plugins.');
   }
-  const plugins = findPlugins(config);
+  const plugins = findPlugins(configDecl);
   if (!plugins) {
-    throw new Error('Cannot find plugins while insert VitePlugins.');
+    throw new Error('Cannot find plugin section while insert plugins.');
   }
   return findLastPluginPos(plugins, src);
 };
@@ -135,6 +135,89 @@ export const insertWindicssPlugins = (estree: TSESTree.Program, builder: StringB
   insertVitePlugins(estree, builder, `\n    WindiCSS(),`);
 };
 
+/** Find 'config.test' */
+const findTest = (config: TSESTree.ObjectExpression, source: string) => {
+  const result = {
+    property: null as TSESTree.PropertyComputedName | TSESTree.PropertyNonComputedName | null,
+    value: null as TSESTree.ObjectExpression | null,
+    startPos: config.range[0] + 1,
+    endPos: -1,
+  };
+  for (const property of config.properties) {
+    if (result.property && result.endPos === -1) {
+      result.endPos = property.range[0];
+    }
+    if (
+      property.type !== 'Property' ||
+      property.key.type !== 'Identifier' ||
+      property.key.name !== 'test' ||
+      property.value.type !== 'ObjectExpression'
+    ) {
+      continue;
+    }
+    result.property = property;
+    result.value = property.value;
+    result.startPos = property.range[0];
+    if (source[result.startPos] === ',') {
+      result.startPos++; // trailing comma
+    }
+  }
+  if (result.endPos === -1) {
+    result.startPos -= 2; // leading space
+    result.endPos = config.range[1] - 1;
+  }
+  return result;
+};
+
+const findTestEnvironment = (testDecl: TSESTree.ObjectExpression) => {
+  for (const property of testDecl.properties) {
+    if (
+      property.type !== 'Property' ||
+      property.key.type !== 'Identifier' ||
+      property.key.name !== 'environment' ||
+      property.value.type !== 'Literal' ||
+      property.value.value !== 'happy-dom'
+    ) {
+      continue;
+    }
+    return property;
+  }
+  return null;
+};
+
+export const patchViteConfigTest = (
+  estree: TSESTree.Program,
+  builder: StringBuilder,
+  config: PromptAnswers,
+) => {
+  const configDecl = findConfigDeclaration(estree);
+  if (!configDecl) {
+    throw new Error('Cannot find vite config while patching test.');
+  }
+  const findTestResult = findTest(configDecl, builder.source);
+  const testDecl = findTestResult.property;
+  if (!testDecl || !findTestResult.value) {
+    if (config.test.length > 0) {
+      throw new Error('Cannot find test section while patching test.');
+    } else {
+      return;
+    }
+  }
+
+  if (config.test.length === 0) {
+    // no test, remove the section
+    builder.remove(findTestResult.startPos, findTestResult.endPos);
+  } else {
+    if (!config.test.includes('unit')) {
+      // no unit test, change 'environment' to 'node'
+      const envDecl = findTestEnvironment(findTestResult.value);
+      if (envDecl) {
+        builder.replace(envDecl.value.range[0], envDecl.value.range[1], `'node'`);
+      }
+    }
+  }
+};
+
 /** Transform string */
 export const patchViteConfig = (
   code: string,
@@ -148,7 +231,7 @@ export const patchViteConfig = (
       insertWindicssPlugins(estree, builder);
     }
   }
-
+  patchViteConfigTest(estree, builder, config);
   return builder.apply();
 };
 

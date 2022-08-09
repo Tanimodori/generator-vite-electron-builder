@@ -26,6 +26,10 @@ const configWithWindiCSS: PromptAnswers = {
   ...configWithoutWindiCSS,
   css: [...configWithoutWindiCSS.css, 'windicss'],
 };
+const configWithE2E: PromptAnswers = {
+  ...configWithoutWindiCSS,
+  test: [...configWithoutWindiCSS.test, 'e2e'],
+};
 
 describe('vite.config.js Unit Test (Simple)', () => {
   interface LocalTestContext {
@@ -110,8 +114,15 @@ describe('vite.config.js Unit Test (Actual)', () => {
     expect(patchedViteConfig).toContain('WindiCSS');
   }) as TestFunction<LocalTestContext> as TestFunction);
 
+  it('can transform actual config with e2e', (async (context) => {
+    const patchedViteConfig = patchViteConfig(context.source, configWithE2E, 'renderer');
+    expect(patchedViteConfig).toContain(`environment: 'node',`);
+  }) as TestFunction<LocalTestContext> as TestFunction);
+
   it('can transform actual config with noop', (async (context) => {
     const patchedViteConfig = patchViteConfig(context.source, configWithoutWindiCSS, 'renderer');
     expect(patchedViteConfig).not.toContain('WindiCSS');
+    console.log(patchedViteConfig);
+    expect(patchedViteConfig).not.toContain('  test: {');
   }) as TestFunction<LocalTestContext> as TestFunction);
 });
