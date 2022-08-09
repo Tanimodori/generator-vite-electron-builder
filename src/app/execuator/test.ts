@@ -10,7 +10,7 @@ export const unitTestPath = [
 export const e2eTestPath = `tests`;
 
 /** Transform file */
-export const patchPrettierFrom = async (dest: string, config: PromptAnswers) => {
+export const patchTestFileFrom = async (dest: string, config: PromptAnswers) => {
   if (!config.test.includes('unit')) {
     // no unit files
     for (const unitTestPathItem of unitTestPath) {
