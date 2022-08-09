@@ -4,6 +4,7 @@ import {
   patchRendererConfig,
   insertImports,
   insertVitePlugins,
+  rendererConfigPath,
 } from 'src/app/execuator/viteConfig';
 import { PromptAnswers } from 'src/app/prompts';
 import type { StringBuilder } from 'src/app/execuator/stringModification';
@@ -97,7 +98,7 @@ describe('vite.config.js Unit Test (Actual)', () => {
   let source = '';
 
   beforeAll(async () => {
-    source = await loadOriginalRepoFile('packages/renderer/vite.config.js');
+    source = await loadOriginalRepoFile(rendererConfigPath);
   });
 
   beforeEach((async (context) => {

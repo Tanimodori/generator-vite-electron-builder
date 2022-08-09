@@ -3,6 +3,7 @@ import {
   buildDevMods,
   featDeps,
   featScripts,
+  packageJsonPath,
   patchDevDependencies,
   patchName,
   patchScripts,
@@ -48,7 +49,7 @@ describe('package.json Unit Test (Actual)', async () => {
   };
 
   beforeAll(async () => {
-    packageJson = await loadOriginalRepoFile('package.json');
+    packageJson = await loadOriginalRepoFile(packageJsonPath);
   });
 
   beforeEach(((context) => {

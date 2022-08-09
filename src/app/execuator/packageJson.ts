@@ -1,7 +1,10 @@
 import { findNodeAtLocation } from 'jsonc-parser';
+import path from 'path';
 import { PromptAnswers } from '../prompts';
 import { transformFile } from './fs';
 import { editJsonc, parseJsonc } from './jsonc';
+
+export const packageJsonPath = 'package.json';
 
 export const featDeps = {
   eslint: ['eslint', '@typescript-eslint/eslint-plugin', 'eslint-plugin-vue'],
@@ -143,9 +146,9 @@ export const patchPackageJson = (code: string, config: PromptAnswers) => {
 };
 
 /** Transform file */
-export const patchPackageJsonFrom = async (path: string, config: PromptAnswers) => {
+export const patchPackageJsonFrom = async (dest: string, config: PromptAnswers) => {
   let addition: string[] = [];
-  await transformFile(path, (src) => {
+  await transformFile(path.resolve(dest, packageJsonPath), (src) => {
     const result = patchPackageJson(src, config);
     addition = result.addition;
     return result.code;

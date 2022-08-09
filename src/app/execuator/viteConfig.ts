@@ -3,6 +3,9 @@ import { modifyString, type StringBuilder } from './stringModification';
 import { TSESTree } from '@typescript-eslint/types';
 import { parseCode } from './typescript';
 import { transformFile } from './fs';
+import path from 'path';
+
+export const rendererConfigPath = 'packages/renderer/vite.config.js';
 
 /** Find the position to insert imports */
 export const findInsertImportsPos = (estree: TSESTree.Program): number => {
@@ -137,6 +140,8 @@ export const patchRendererConfig = (code: string, config: PromptAnswers) => {
 };
 
 /** Transform file */
-export const patchRendererConfigFrom = async (path: string, config: PromptAnswers) => {
-  await transformFile(path, (src) => patchRendererConfig(src, config));
+export const patchRendererConfigFrom = async (dest: string, config: PromptAnswers) => {
+  await transformFile(path.resolve(dest, rendererConfigPath), (src) =>
+    patchRendererConfig(src, config),
+  );
 };
