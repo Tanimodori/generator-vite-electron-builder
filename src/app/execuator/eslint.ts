@@ -1,8 +1,8 @@
 import { findNodeAtLocation } from 'jsonc-parser';
 import path from 'path';
+import fs from 'fs';
 import { PromptAnswers } from '../prompts';
 import { transformFile } from './fs';
-import fs from 'fs';
 import { editJsonc, parseJsonc } from './jsonc';
 
 export const eslintrcPath = {
