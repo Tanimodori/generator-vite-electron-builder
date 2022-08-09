@@ -122,7 +122,6 @@ describe('vite.config.js Unit Test (Actual)', () => {
   it('can transform actual config with noop', (async (context) => {
     const patchedViteConfig = patchViteConfig(context.source, configWithoutWindiCSS, 'renderer');
     expect(patchedViteConfig).not.toContain('WindiCSS');
-    console.log(patchedViteConfig);
     expect(patchedViteConfig).not.toContain('  test: {');
   }) as TestFunction<LocalTestContext> as TestFunction);
 });
