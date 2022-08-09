@@ -1,4 +1,4 @@
-import { eslintPrettierExtends, eslintrcPath, patchEslintrc } from 'src/app/execuator/eslint';
+import { eslintPrettierExtends, eslintrcPath, patchEslintrc } from 'src/eslint';
 import { PromptAnswers } from 'src/app/prompts';
 import { beforeAll, beforeEach, describe, expect, it, TestFunction } from 'vitest';
 import { BeforeEachFunction } from './types';

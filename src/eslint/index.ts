@@ -1,9 +1,7 @@
+import Generator from 'yeoman-generator';
 import { findNodeAtLocation } from 'jsonc-parser';
-import path from 'path';
-import fs from 'fs';
-import { PromptAnswers } from '../prompts';
-import { transformFile } from './fs';
-import { editJsonc, parseJsonc } from './jsonc';
+import { PromptAnswers } from '../app/prompts';
+import { editJsonc, parseJsonc } from '../app/execuator/jsonc';
 
 export const eslintrcPath = {
   index: '.eslintrc.json',
@@ -29,7 +27,6 @@ export const insertExtends = (code: string, items: string[]) => {
       isArrayInsertion: true,
     });
   }
-  console.log(result);
   return result;
 };
 
@@ -42,15 +39,24 @@ export const patchEslintrc = (code: string, config: PromptAnswers) => {
   }
 };
 
-/** Transform file */
-export const patchEslintrcFrom = async (dest: string, config: PromptAnswers) => {
-  for (const eslintrcPathItem in Object.values(eslintrcPath)) {
-    const finalPath = path.resolve(dest, eslintrcPathItem);
-    if (!config.eslint) {
-      // no eslint
-      await fs.promises.rm(finalPath);
-    } else {
-      await transformFile(finalPath, (src) => patchEslintrc(src, config));
+export default class EslintConfigGenerator extends Generator {
+  options: PromptAnswers;
+  constructor(args: string | string[], opts: Generator.GeneratorOptions) {
+    super(args, opts);
+
+    this.options = opts as PromptAnswers;
+  }
+
+  async writing() {
+    for (const eslintrcPathItem in Object.values(eslintrcPath)) {
+      if (!this.options.eslint) {
+        // no eslint
+        this.fs.delete(eslintrcPathItem);
+      } else {
+        let content = this.fs.read(eslintrcPathItem);
+        content = patchEslintrc(content, this.options);
+        this.fs.write(eslintrcPathItem, content);
+      }
     }
   }
-};
+}

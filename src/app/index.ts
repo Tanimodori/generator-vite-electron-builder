@@ -1,6 +1,5 @@
 import Generator from 'yeoman-generator';
 import { gitCloneTo } from './execuator/git';
-import { patchEslintrcFrom } from './execuator/eslint';
 import { patchPackageJsonFrom } from './execuator/packageJson';
 import { patchPrettierFrom } from './execuator/prettier';
 import { patchTestFileFrom } from './execuator/test';
@@ -53,7 +52,10 @@ export default class extends Generator {
     await gitCloneTo(REPO_URL, this.answers.id, this.logger);
 
     // Mount hooks
-    await patchEslintrcFrom(this.destinationPath(), this.answers);
+    this.composeWith('../eslint', {
+      ...this.answers,
+      destinationRoot: this.destinationPath(),
+    });
     const depAddition = await patchPackageJsonFrom(this.destinationPath(), this.answers);
     await patchViteConfigFrom(this.destinationPath(), this.answers);
     await patchPrettierFrom(this.destinationPath(), this.answers);
