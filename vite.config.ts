@@ -1,12 +1,7 @@
 import { defineConfig, configDefaults } from 'vitest/config';
-import builtins from './src/app/validate/builtins';
+import builtins from 'builtins';
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      builtins: './src/app/validate/builtins.ts',
-    },
-  },
   build: {
     outDir: 'generator',
     emptyOutDir: true,
@@ -23,6 +18,7 @@ export default defineConfig({
         '@typescript-eslint/typescript-estree',
         'jsonc-parser',
         'validate-npm-package-name',
+        'builtins',
         ...builtins(),
       ],
       output: {
