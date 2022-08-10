@@ -7,6 +7,8 @@ import { patchViteConfigFrom } from './execuator/viteConfig';
 import { getPrompts, type PromptAnswers } from './prompts';
 import { Logger } from './types/types';
 import { hasGit } from './validate/toolchain';
+import EslintConfigGenerator from '../eslint';
+import path from 'path';
 
 export const REPO_URL = 'https://github.com/cawa-93/vite-electron-builder.git';
 
@@ -25,6 +27,11 @@ export default class extends Generator {
   }
 
   async initializing() {
+    this.composeWith(
+      { Generator: EslintConfigGenerator, path: path.resolve(__dirname, '../eslint') },
+      this.answers,
+    );
+
     this.log('Welcome to use vite-electron-builder');
     this.log();
     // Checking prerequisites
@@ -49,13 +56,13 @@ export default class extends Generator {
     // Set destination path to sub directory
     this.destinationRoot(this.destinationPath(this.answers.id));
     // Clone git repository
-    await gitCloneTo(REPO_URL, this.answers.id, this.logger);
+    await gitCloneTo(REPO_URL, this.destinationPath(), this.logger);
 
     // Mount hooks
-    this.composeWith('../eslint', {
-      ...this.answers,
-      destinationRoot: this.destinationPath(),
-    });
+    this.composeWith(
+      { Generator: EslintConfigGenerator, path: path.resolve(__dirname, '../eslint') },
+      this.answers,
+    );
     const depAddition = await patchPackageJsonFrom(this.destinationPath(), this.answers);
     await patchViteConfigFrom(this.destinationPath(), this.answers);
     await patchPrettierFrom(this.destinationPath(), this.answers);
