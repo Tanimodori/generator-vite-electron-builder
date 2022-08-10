@@ -14,11 +14,17 @@ export const patchTestFileFrom = async (dest: string, config: PromptAnswers) => 
   if (!config.test.includes('unit')) {
     // no unit files
     for (const unitTestPathItem of unitTestPath) {
-      await fs.promises.rm(path.resolve(dest, unitTestPathItem));
+      await fs.promises.rm(path.resolve(dest, unitTestPathItem), {
+        recursive: true,
+        force: true,
+      });
     }
   }
   if (!config.test.includes('e2e')) {
     // no e2e files
-    await fs.promises.rm(path.resolve(dest, e2eTestPath));
+    await fs.promises.rm(path.resolve(dest, e2eTestPath), {
+      recursive: true,
+      force: true,
+    });
   }
 };
