@@ -230,8 +230,8 @@ export const patchViteConfig = (
     if (config.css.indexOf('windicss') !== -1) {
       insertWindicssPlugins(estree, builder);
     }
+    patchViteConfigTest(estree, builder, config);
   }
-  patchViteConfigTest(estree, builder, config);
   return builder.apply();
 };
 
