@@ -1,5 +1,4 @@
 import { defineConfig, configDefaults } from 'vitest/config';
-import glob from 'glob';
 import builtins from './src/app/validate/builtins';
 
 export default defineConfig({
@@ -26,7 +25,6 @@ export default defineConfig({
         'validate-npm-package-name',
         ...builtins(),
       ],
-      input: glob.sync('src/**/*.ts'),
       output: {
         exports: 'named',
         preserveModules: true,
