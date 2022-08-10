@@ -18,7 +18,14 @@ export default defineConfig({
       formats: ['cjs'],
     },
     rollupOptions: {
-      external: ['yeoman-generator', 'yo', ...builtins()],
+      external: [
+        'yeoman-generator',
+        'yo',
+        '@typescript-eslint/typescript-estree',
+        'jsonc-parser',
+        'validate-npm-package-name',
+        ...builtins(),
+      ],
       input: glob.sync('src/**/*.ts'),
       output: {
         exports: 'named',
