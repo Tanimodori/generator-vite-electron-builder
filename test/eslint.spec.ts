@@ -1,7 +1,6 @@
 import { eslintPrettierExtends, eslintrcPath, patchEslintrc } from 'src/eslint';
 import { PromptAnswers } from 'src/app/prompts';
-import { beforeAll, beforeEach, describe, expect, it, TestFunction } from 'vitest';
-import { BeforeEachFunction } from './types';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { loadOriginalRepoFile } from './utils';
 
 const configNoop: PromptAnswers = {
@@ -30,12 +29,12 @@ describe('.eslintrc Unit Test (Actual)', async () => {
     eslintrc = await loadOriginalRepoFile(eslintrcPath.index);
   });
 
-  beforeEach(((context) => {
+  beforeEach<LocalTestContext>((context) => {
     context.eslintrc = eslintrc;
-  }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
+  });
 
-  it('should edit .eslintrc correctly', ((context) => {
+  it<LocalTestContext>('should edit .eslintrc correctly', (context) => {
     const patchedCode = patchEslintrc(context.eslintrc, configWithEslintPrettier);
     expect(eslintPrettierExtends.every((item) => patchedCode.includes(item))).toBe(true);
-  }) as TestFunction<LocalTestContext> as TestFunction);
+  });
 });

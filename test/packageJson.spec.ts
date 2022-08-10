@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, it, TestFunction, expect } from 'vitest';
+import { beforeAll, beforeEach, describe, it, expect } from 'vitest';
 import {
   buildDevMods,
   featDeps,
@@ -9,7 +9,6 @@ import {
   patchScripts,
 } from 'src/app/execuator/packageJson';
 import { PromptAnswers } from 'src/app/prompts';
-import { BeforeEachFunction } from './types';
 import { loadOriginalRepoFile } from './utils';
 
 const configNoop: PromptAnswers = {
@@ -52,16 +51,16 @@ describe('package.json Unit Test (Actual)', async () => {
     packageJson = await loadOriginalRepoFile(packageJsonPath);
   });
 
-  beforeEach(((context) => {
+  beforeEach<LocalTestContext>((context) => {
     context.packageJson = packageJson;
-  }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
+  });
 
   it('should construct depmod correctly', () => {
     expect(Object.values(buildDevMods(configNoop)).every((x) => x === false)).toBe(true);
     expect(Object.values(buildDevMods(configFull)).every((x) => x === true)).toBe(true);
   });
 
-  it('should edit package.json devDeps correctly', ((context) => {
+  it<LocalTestContext>('should edit package.json devDeps correctly', (context) => {
     const noopResult = patchDevDependencies(context.packageJson, configNoop);
     const noopDevDep = getConfigSection(noopResult.code, 'devDependencies');
     expect(allFeatPackages.every((key) => !noopDevDep.includes(key))).toBe(true);
@@ -72,7 +71,7 @@ describe('package.json Unit Test (Actual)', async () => {
     expect(
       allFeatPackages.every((key) => fullDevDep.includes(key) || fullResult.addition.includes(key)),
     ).toBe(true);
-  }) as TestFunction<LocalTestContext> as TestFunction);
+  });
 
   it('should edit package.json scripts correctly', async () => {
     const noopResult = patchScripts(packageJson, configNoop);

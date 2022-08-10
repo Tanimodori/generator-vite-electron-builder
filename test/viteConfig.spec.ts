@@ -9,8 +9,7 @@ import {
 import { PromptAnswers } from 'src/app/prompts';
 import type { StringBuilder } from 'src/app/execuator/stringModification';
 import type { TSESTree } from '@typescript-eslint/types';
-import { beforeAll, beforeEach, describe, expect, it, TestFunction } from 'vitest';
-import { BeforeEachFunction } from './types';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { loadOriginalRepoFile } from './utils';
 
 const configWithoutWindiCSS: PromptAnswers = {
@@ -37,7 +36,7 @@ describe('vite.config.js Unit Test (Simple)', () => {
     builder: StringBuilder;
   }
 
-  beforeEach(((context) => {
+  beforeEach<LocalTestContext>((context) => {
     const exampleCode = `
 import {foo} from 'bar';
 
@@ -53,9 +52,9 @@ const config = {
 `;
     context.estree = parseCode(exampleCode);
     context.builder = modifyString(exampleCode);
-  }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
+  });
 
-  it('can insert import', ((context) => {
+  it<LocalTestContext>('can insert import', (context) => {
     const expectedCode = `
 import {foo} from 'bar';
 import {bar} from 'foo';
@@ -72,9 +71,9 @@ const config = {
 `;
     insertImports(context.estree, context.builder, "import {bar} from 'foo';\n");
     expect(context.builder.apply()).toBe(expectedCode);
-  }) as TestFunction<LocalTestContext> as TestFunction);
+  });
 
-  it('can insert plugin', ((context) => {
+  it<LocalTestContext>('can insert plugin', (context) => {
     const expectedCode = `
 import {foo} from 'bar';
 
@@ -91,7 +90,7 @@ const config = {
 `;
     insertVitePlugins(context.estree, context.builder, '\n    foo(),');
     expect(context.builder.apply()).toBe(expectedCode);
-  }) as TestFunction<LocalTestContext> as TestFunction);
+  });
 });
 
 describe('vite.config.js Unit Test (Actual)', () => {
@@ -105,23 +104,23 @@ describe('vite.config.js Unit Test (Actual)', () => {
     source = await loadOriginalRepoFile(viteConfigPath.renderer);
   });
 
-  beforeEach((async (context) => {
+  beforeEach<LocalTestContext>(async (context) => {
     context.source = source;
-  }) as BeforeEachFunction<LocalTestContext> as BeforeEachFunction);
+  });
 
-  it('can transform actual config with windicss', (async (context) => {
+  it<LocalTestContext>('can transform actual config with windicss', async (context) => {
     const patchedViteConfig = patchViteConfig(context.source, configWithWindiCSS, 'renderer');
     expect(patchedViteConfig).toContain('WindiCSS');
-  }) as TestFunction<LocalTestContext> as TestFunction);
+  });
 
-  it('can transform actual config with e2e', (async (context) => {
+  it<LocalTestContext>('can transform actual config with e2e', async (context) => {
     const patchedViteConfig = patchViteConfig(context.source, configWithE2E, 'renderer');
     expect(patchedViteConfig).toContain(`environment: 'node',`);
-  }) as TestFunction<LocalTestContext> as TestFunction);
+  });
 
-  it('can transform actual config with noop', (async (context) => {
+  it<LocalTestContext>('can transform actual config with noop', async (context) => {
     const patchedViteConfig = patchViteConfig(context.source, configWithoutWindiCSS, 'renderer');
     expect(patchedViteConfig).not.toContain('WindiCSS');
     expect(patchedViteConfig).not.toContain('  test: {');
-  }) as TestFunction<LocalTestContext> as TestFunction);
+  });
 });
